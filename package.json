@@ -1,14 +1,14 @@
 {
-  "name": "react-native-bluetooth-serial-next",
-  "version": "1.2.4",
-  "description": "Bluetooth serial for react native",
+  "name": "@infobiotech/react-native-bluetooth-serial-next-integers",
+  "version": "0.1.0",
+  "description": "Bluetooth serial for react native integers",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nuttawutmalee/react-native-bluetooth-serial-next.git"
+    "url": "git+https://github.com/infobiotech/react-native-bluetooth-serial-next-integers.git"
   },
   "keywords": [
     "bluetooth",
@@ -17,12 +17,12 @@
     "native",
     "react-native"
   ],
-  "author": "Nuttawut Malee <nuttawutmalee@gmail.com>",
+  "author": "Infobiotech <a.raffa@infobiotech.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nuttawutmalee/react-native-bluetooth-serial-next/issues"
+    "url": "https://github.com/infobiotech/react-native-bluetooth-serial-next-integers/issues"
   },
-  "homepage": "https://nuttawutmalee.github.io/react-native-bluetooth-serial-next/",
+  "homepage": "https://github.com/infobiotech/react-native-bluetooth-serial-next-integers/",
   "dependencies": {
     "@babel/runtime": "^7.1.5",
     "buffer": "^5.2.1"
@@ -30,5 +30,8 @@
   "peerDependencies": {
     "react": "*",
     "react-native": ">=0.40"
+  },
+  "directories": {
+    "example": "example"
   }
 }
