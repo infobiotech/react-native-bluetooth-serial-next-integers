@@ -1,3 +1,5 @@
+## <span style="color: red;">This repository is forked form the original. The README is not updated.</span>
+
 ## <span style="color: red;">This repository is considered as unstable for production.</span>
 
 # React Native Bluetooth Serial Next :)
