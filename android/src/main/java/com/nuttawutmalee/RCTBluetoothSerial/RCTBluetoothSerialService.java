@@ -48,7 +48,7 @@ class RCTBluetoothSerialService {
 
     /**
      * Constructor. Prepares a new RCTBluetoothSerialModule session.
-     * 
+     *
      * @param module Module which handles service events
      */
     RCTBluetoothSerialService(RCTBluetoothSerialModule module) {
@@ -74,7 +74,7 @@ class RCTBluetoothSerialService {
 
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
-     * 
+     *
      * @param device The BluetoothDevice to connect
      */
     synchronized void connect(BluetoothDevice device) {
@@ -203,7 +203,7 @@ class RCTBluetoothSerialService {
 
     /**
      * Start the ConnectedThread to begin managing a Bluetooth connection
-     * 
+     *
      * @param socket The BluetoothSocket on which the connection was made
      * @param device The BluetoothDevice that has been connected
      */
@@ -233,7 +233,7 @@ class RCTBluetoothSerialService {
 
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
-     * 
+     *
      * @param device The BluetoothDevice that has been failed to connect
      */
     private void connectionFailed(BluetoothDevice device) {
@@ -243,7 +243,7 @@ class RCTBluetoothSerialService {
 
     /**
      * Indicate that the connection was lost and notify the UI Activity.
-     * 
+     *
      * @param device The BluetoothDevice that has been lost
      */
     private void connectionLost(BluetoothDevice device) {
@@ -428,14 +428,26 @@ class RCTBluetoothSerialService {
             byte[] buffer = new byte[1024];
             int bytes;
 
+
             String id = mmDevice.getAddress();
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
                     bytes = mmInStream.read(buffer); // Read from the InputStream
-                    String data = new String(buffer, 0, bytes, "ISO-8859-1");
-                    mModule.onData(id, data); // Send the new data String to the UI Activity
+
+                    int commandLength = buffer[0]*256 + buffer[1];
+
+                    byte[] realBuffer = new byte[commandLength];
+
+                    for (int index = 0; index < commandLength; index++) {
+                      realBuffer[index] = buffer[index];
+                    }
+
+                    // String data = new String(buffer, 0, bytes, "ISO-8859-1");
+
+                    mModule.onData(id, realBuffer/* ALE data */); // Send the new data String to the UI Activity
+
                 } catch (Exception e) {
                     Log.e(TAG, "disconnected", e);
                     mModule.onError(e);
@@ -447,7 +459,7 @@ class RCTBluetoothSerialService {
 
         /**
          * Write to the connected OutStream.
-         * 
+         *
          * @param buffer The bytes to write
          */
         void write(byte[] buffer) {
