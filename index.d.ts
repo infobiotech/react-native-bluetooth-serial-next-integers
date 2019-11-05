@@ -1,5 +1,5 @@
-// Type definitions for react-native-bluetooth-serial-next-integers 1.0.0
-// Project: https://github.com/nuttawutmalee/react-native-bluetooth-serial-next-integers
+// Type definitions for react-native-bluetooth-serial-next 1.0.0
+// Project: https://github.com/nuttawutmalee/react-native-bluetooth-serial-next
 // Definitions by: Nuttawut Malee <https://github.com/nuttawutmalee>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 3.1.6
