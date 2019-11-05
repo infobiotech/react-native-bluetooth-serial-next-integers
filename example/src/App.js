@@ -13,7 +13,7 @@ import {
 import Toast from "@remobile/react-native-toast";
 import BluetoothSerial, {
   withSubscription
-} from "react-native-bluetooth-serial-next";
+} from "react-native-bluetooth-serial-next-integers";
 import { Buffer } from "buffer";
 
 import Button from "./components/Button";
