@@ -481,7 +481,8 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
             /*
              *
              */
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[1024]; //
+
         /*
          *
          */
@@ -542,9 +543,9 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
           /*
            *
            */
-          byte[] buffer = new byte[1024]; // ADD
-            buffer = mBuffers.get(id);
+            // buffer = mBuffers.get(id);
             // buffer.setLength(0);
+           byte[] buffer = new byte[1]; // set length to 1 as if it would 'buffer.setLength(0);''
         /*
          *
          */
