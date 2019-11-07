@@ -2,6 +2,7 @@ package com.nuttawutmalee.RCTBluetoothSerial;
 
 import java.lang.reflect.Method;
 import java.util.Arrays; // to compare arrays
+import java.util.ArrayList; // to use ArrayList
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +72,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
 /*
  *
  */
-    private HashMap<String, byte[]> mBuffers; // changed to byte[] from StringBuffer
+    private HashMap<String, /*byte[]*/ArrayList<byte[]>> mBuffers; // changed to byte[] from StringBuffer
     /*
      *
      */
@@ -481,20 +482,24 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
             /*
              *
              */
-        byte[] buffer = new byte[1024]; //
-
+        ArrayList<byte[]> data = new ArrayList<>();
+            /* String data = ""; */
         /*
          *
          */
         if (mBuffers.containsKey(id)) {
+
+          ArrayList<byte[]> buffer = new ArrayList<>();
             buffer = mBuffers.get(id);
             /*
              * @todo split/clear the buffer
              */
+            data = (ArrayList) buffer.clone();
             // ALE int length = buffer.length();
             // ALE data = buffer.substring(0, length);
             // ALE buffer.delete(0, length);
-            mBuffers.put(id, /* ALE data */ buffer);
+            buffer.removeAll(buffer);
+            mBuffers.put(id, buffer);
             /*
              *
              */
@@ -502,7 +507,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
 /*
  *
  */
-        promise.resolve(/* ALE data */ buffer);
+        promise.resolve(data);
         /*
          *
          */
@@ -514,7 +519,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
             id = mBluetoothService.getFirstDeviceAddress();
         }
 
-        promise.resolve(readUntil(id, delimiter));
+        promise.resolve(readUntil(id));
     }
 
     @ReactMethod
@@ -543,9 +548,9 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
           /*
            *
            */
-            // buffer = mBuffers.get(id);
+            // StringBuffer buffer = mBuffers.get(id);
             // buffer.setLength(0);
-           byte[] buffer = new byte[1]; // set length to 1 as if it would 'buffer.setLength(0);''
+           ArrayList<byte[]> buffer = new ArrayList<>(); // set length to 1 as if it would 'buffer.setLength(0);''
         /*
          *
          */
@@ -565,20 +570,15 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
         /*
          *
          */
-        Boolean empty = true;
-        /*
-         *
-         */
-
         if (mBuffers.containsKey(id)) {
           /*
            *
            */
-          byte[] emptyBuffer = new byte[1024]; // ADD
-          byte[] buffer = new byte[1024]; // ADD
-          /* ALE StringBuffer */ buffer = mBuffers.get(id);
+          // byte[] emptyBuffer = new byte[1024]; // ADD
+          // byte[] buffer = new byte[1024]; // ADD
+          /* ALE StringBuffer */ ArrayList<byte[]> buffer = mBuffers.get(id);
           // ALE length = buffer.length();
-          empty = Arrays.equals(buffer, emptyBuffer); // ADD
+          length = buffer.size(); // ADD
           /*
            *
            */
@@ -587,7 +587,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
 /*
  *
  */
-        promise.resolve(/* length */!empty);
+        promise.resolve(length);
         /*
          *
          */
@@ -638,7 +638,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
           /*
            *
            */
-          byte[] buffer = new byte[1024]; // ADD
+          ArrayList<byte[]> buffer = new ArrayList<>(); // ADD
             mBuffers.put(id, buffer /* ALE StringBuffer() */);
             /*
              *
@@ -724,37 +724,47 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
     void onData(String id, byte[] data) { // fingerprint changed
         if (mBuffers.containsKey(id)) {
           /*
-           *
+           * String[] both = ArrayUtils.addAll(buffer, data);
            */
           // byte[] buffer = new byte[1024]; // ADD
-            /* ALE StringBuffer */ // buffer = mBuffers.get(id);
+            /* ALE StringBuffer */ ArrayList<byte[]> buffer = mBuffers.get(id);
             // buffer.append(data);
-            mBuffers.put(id, /* ALE buffer */data);
+            buffer.add(data);
+            mBuffers.put(id, /* ALE buffer *//*data*//*mergedData*/buffer);
             /*
              *
              */
         }
 
+/*
         String delimiter = "";
 
         if (mDelimiters.containsKey(id)) {
             delimiter = mDelimiters.get(id);
         }
+*/
 
 /*
  *
  */
-        byte[] completeData = new byte[data.length];
-        completeData = readUntil(id, delimiter);
-        WritableArray completeDataWritableArray = Arguments.createArray();
-        for (int index = 0; index < data.length; index++) {
-          completeDataWritableArray.pushInt(completeData[index]&0xFF);
-        }
-        if (data.length > 0 /* != null/* && completeData.length() > 0*/) {
+        /* String */byte[] completeData = readUntil(id);
+
+
+
+
+
+        if (completeData.length > 0 /* != null/* && completeData.length() > 0*/) {
+
+                WritableArray completeDataWritableArray = Arguments.createArray();
+                for (int index = 0; index < completeData.length; index++) {
+                  completeDataWritableArray.pushInt(completeData[index]&0xFF);
+                }
+
             WritableMap readParams = Arguments.createMap();
             readParams.putString("id", id);
             readParams.putArray("data", completeDataWritableArray);
             sendEvent(DEVICE_READ, readParams);
+
             WritableMap dataParams = Arguments.createMap();
             dataParams.putString("id", id);
             dataParams.putArray("data", completeDataWritableArray);
@@ -769,25 +779,30 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
      * Handle read until find a certain delimiter
      *
      * @param id        Device address
-     * @param delimiter
      * @return buffer data from device
      */
-    private byte[] readUntil(String id, String delimiter) {
-        String data = "";
-        /*
-         *
-         */
-        byte[] buffer = new byte[1024];
-        /*
-         *
-         */
+    private byte[] readUntil(String id) {
+        // String data = "";
         if (mBuffers.containsKey(id)) {
+        /*
+         *
+         */
+        // byte[] buffer = new byte[length];
           /*
            *
            */
-          //byte[] buffer = new byte[1024];
-          /* ALE StringBuffer */ buffer = mBuffers.get(id);
-          return buffer; // ALE
+          /* ALE StringBuffer */ ArrayList<byte[]> buffer = mBuffers.get(id);
+
+          byte[] data = buffer.remove(0);
+
+          mBuffers.put(id, buffer);
+
+
+
+
+
+
+          return data; // ALE
 /*
             int index = 5; // buffer.indexOf(delimiter, 0);
 
@@ -801,7 +816,11 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
  *
  */
         }
-        return buffer;
+        else {
+          byte[] emptyBuffer = new byte[1];
+          return emptyBuffer;
+        }
+
     }
 
     /**

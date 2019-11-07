@@ -435,19 +435,36 @@ class RCTBluetoothSerialService {
             while (true) {
                 try {
                     bytes = mmInStream.read(buffer); // Read from the InputStream
+                    /*
+                     *
+                     */
+                    int messageLength = buffer[0]*256 + buffer[1];
+                    /*
 
-                    int commandLength = buffer[0]*256 + buffer[1];
-
-                    byte[] realBuffer = new byte[commandLength];
-
-                    for (int index = 0; index < commandLength; index++) {
-                      realBuffer[index] = buffer[index];
+                     */
+                    if (bytes != messageLength) {
+                      Log.e(TAG, "data length mismatch");
+                      mModule.onError(new Exeption("data length mismatch"));
                     }
+                    else {
+                      /*
 
-                    // String data = new String(buffer, 0, bytes, "ISO-8859-1");
+                       */
+                      byte[] realBuffer = new byte[messageLength];
+                      for (int index = 0; index < messageLength; index++) {
+                        realBuffer[index] = buffer[index];
+                      }
+                        /*
 
-                    mModule.onData(id, realBuffer/* ALE data */); // Send the new data String to the UI Activity
-
+                         */
+                         //ArrayList<byte[]> messageArrayListItem = new ArrayList<>();
+                         //messageArrayListItem.add(realBuffer);
+                      // String data = new String(buffer, 0, bytes, "ISO-8859-1");
+                      mModule.onData(id, realBuffer/* ALE data */); // Send the new data String to the UI Activity
+                    }
+/*
+ *
+ */
                 } catch (Exception e) {
                     Log.e(TAG, "disconnected", e);
                     mModule.onError(e);
