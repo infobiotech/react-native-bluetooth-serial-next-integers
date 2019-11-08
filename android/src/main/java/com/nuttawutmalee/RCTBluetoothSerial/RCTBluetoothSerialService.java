@@ -3,6 +3,8 @@ package com.nuttawutmalee.RCTBluetoothSerial;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer; // add
+import java.nio.ByteOrder; // add
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -439,6 +441,38 @@ class RCTBluetoothSerialService {
                      *
                      */
                     int messageLength = buffer[0]*256 + buffer[1];
+                    /*
+
+                     */
+                     //Infobiotech Bluetooth protocol
+             int packLength = -1;
+             try{
+                 byte[] packLengthBytes = {buffer[0], buffer[1]};
+                 packLength = (int) ByteBuffer.wrap(packLengthBytes).order(ByteOrder.BIG_ENDIAN).getShort();
+             }catch(Exception e){
+                   Log.e(TAG, "data length mismatch");
+                   mModule.onError(new Exception("Error parsing packet length in header: " + e.getMessage()));
+             }
+
+             if(bytes != packLength){
+                 Log.e(TAG, "data length mismatch");
+                 mModule.onError(new Exception("data length mismatch bytes = " + bytes + "  packLength = " + packLength + "  messageLength = " + messageLength));
+             }
+
+/*
+             int cmd=-1;
+             try{
+                 byte[] cmdBytes = {buffer[3], buffer[4]};
+                 cmd = (int) ByteBuffer.wrap(cmdBytes).order(ByteOrder.BIG_ENDIAN).getShort();
+             }catch(Exception e){
+                 GR_system.globalLogger.exception(231, "BluetoothConnectThread", "Exception parsing command code: "+e.getMessage(), e);
+             }
+*/
+
+
+
+
+
                     /*
 
                      */
