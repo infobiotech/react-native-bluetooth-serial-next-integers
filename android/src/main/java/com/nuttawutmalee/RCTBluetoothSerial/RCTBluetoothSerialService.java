@@ -452,6 +452,8 @@ class RCTBluetoothSerialService {
              if(bytes != packLength){
                  Log.e(TAG, "data length mismatch");
                  mModule.onError(new Exception("data length mismatch bytes = " + bytes + "  packLength = " + packLength));
+                 byte[] realBuffer1 = new byte[1];
+                 mModule.onData(id, realBuffer1);
              }
              else {
                  /*
