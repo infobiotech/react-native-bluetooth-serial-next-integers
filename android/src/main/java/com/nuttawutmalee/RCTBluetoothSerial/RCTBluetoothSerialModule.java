@@ -765,9 +765,14 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
             readParams.putArray("data", completeDataWritableArray);
             sendEvent(DEVICE_READ, readParams);
 
+                  WritableArray completeDataWritableArray2 = Arguments.createArray();
+                  for (int index = 0; index < completeData.length; index++) {
+                    completeDataWritableArray2.pushInt(completeData[index]&0xFF);
+                  }
+
             WritableMap dataParams = Arguments.createMap();
             dataParams.putString("id", id);
-            dataParams.putArray("data", completeDataWritableArray);
+            dataParams.putArray("data", completeDataWritableArray2);
             sendEvent(DATA_READ, dataParams);
         }
     }
