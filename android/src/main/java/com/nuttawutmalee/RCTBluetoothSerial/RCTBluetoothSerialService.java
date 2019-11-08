@@ -440,11 +440,7 @@ class RCTBluetoothSerialService {
                     /*
                      *
                      */
-                    int messageLength = buffer[0]*256 + buffer[1];
-                    /*
-
-                     */
-                     //Infobiotech Bluetooth protocol
+                     //Infobiotech Bluetooth protocol by GIOVANNI
              int packLength = -1;
              try{
                  byte[] packLengthBytes = {buffer[0], buffer[1]};
@@ -453,12 +449,29 @@ class RCTBluetoothSerialService {
                    Log.e(TAG, "data length mismatch");
                    mModule.onError(new Exception("Error parsing packet length in header: " + e.getMessage()));
              }
-
              if(bytes != packLength){
                  Log.e(TAG, "data length mismatch");
                  mModule.onError(new Exception("data length mismatch bytes = " + bytes + "  packLength = " + packLength + "  messageLength = " + messageLength));
              }
+             else {
+                 /*
 
+                  */
+                 byte[] realBuffer = new byte[packLength];
+                 for (int index = 0; index < packLength; index++) {
+                   realBuffer[index] = buffer[index];
+                 }
+                   /*
+
+                    */
+                    //ArrayList<byte[]> messageArrayListItem = new ArrayList<>();
+                    //messageArrayListItem.add(realBuffer);
+                 // String data = new String(buffer, 0, bytes, "ISO-8859-1");
+                 mModule.onData(id, realBuffer/* ALE data */); // Send the new data String to the UI Activity
+                 /*
+
+                  */
+             }
 /*
              int cmd=-1;
              try{
@@ -475,26 +488,12 @@ class RCTBluetoothSerialService {
 
                     /*
 
-                     */
+                     *
                     if (bytes != messageLength) {
                       Log.e(TAG, "data length mismatch");
                       mModule.onError(new Exception("data length mismatch bytes = " + bytes + "  messageLength = " + messageLength));
                     }
                     else {
-                      /*
-
-                       */
-                      byte[] realBuffer = new byte[messageLength];
-                      for (int index = 0; index < messageLength; index++) {
-                        realBuffer[index] = buffer[index];
-                      }
-                        /*
-
-                         */
-                         //ArrayList<byte[]> messageArrayListItem = new ArrayList<>();
-                         //messageArrayListItem.add(realBuffer);
-                      // String data = new String(buffer, 0, bytes, "ISO-8859-1");
-                      mModule.onData(id, realBuffer/* ALE data */); // Send the new data String to the UI Activity
                     }
 /*
  *
