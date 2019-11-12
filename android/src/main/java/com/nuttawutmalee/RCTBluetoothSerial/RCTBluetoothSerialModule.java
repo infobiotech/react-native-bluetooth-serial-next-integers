@@ -456,16 +456,16 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
     }
 
     @ReactMethod
-    public void writeToDevice(String message, @Nullable String id, Promise promise) {
+    public void writeToDevice(/*String message*/byte[] data, @Nullable String id, Promise promise) {
         if (id == null) {
             id = mBluetoothService.getFirstDeviceAddress();
         }
 
-        if (D)
-            Log.d(TAG, "Write to device id " + id + " : " + message);
+        //if (D)
+        //    Log.d(TAG, "Write to device id " + id + " : " + message);
 
         if (id != null) {
-            byte[] data = Base64.decode(message, Base64.DEFAULT);
+            // byte[] data = Base64.decode(message, Base64.DEFAULT);
             mBluetoothService.write(id, data);
         }
 

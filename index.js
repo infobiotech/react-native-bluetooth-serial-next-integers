@@ -234,10 +234,13 @@ BluetoothSerial.device = (id = null) => ({
    * @return {Promise<Boolean>}
    */
   write: data => {
+    return BluetoothSerial.writeToDevice(data, id);
+    /*
     if (typeof data === "string") {
       data = new Buffer(data);
     }
     return BluetoothSerial.writeToDevice(data.toString("base64"), id);
+    */
   },
 
   /**

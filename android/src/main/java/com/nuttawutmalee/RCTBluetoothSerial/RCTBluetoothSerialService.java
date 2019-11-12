@@ -517,8 +517,8 @@ class RCTBluetoothSerialService {
         void write(byte[] buffer) {
             try {
                 String str = new String(buffer, "UTF-8");
-                if (D)
-                    Log.d(TAG, "Write in thread " + str);
+                //if (D)
+                //    Log.d(TAG, "Write in thread " + str);
                 mmOutStream.write(buffer);
             } catch (Exception e) {
                 Log.e(TAG, "Exception during write", e);
