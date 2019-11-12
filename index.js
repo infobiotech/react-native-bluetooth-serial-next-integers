@@ -285,25 +285,13 @@ BluetoothSerial.device = (id = null) => ({
    * @return {Promise<Boolean>}
    */
   write: data => {
-    const originalData = data;
+    /*
     if (typeof data === "string") {
       data = new Buffer(data);
     }
-    const buffer = data.toString("hex" /*"base64"*/);
-    const finalData = Base64.btoa(originalData);
-    console.log(
-      "111 *********************************************\n",
-      {
-        aoriginalData: originalData,
-        aoriginalDataLength: originalData.length,
-        bdata: data,
-        bdataLength: data.length,
-        cbuffer: buffer,
-        dfinalData: finalData
-      },
-      "\n*********************************************"
-    );
-    return BluetoothSerial.writeToDevice(finalData, id);
+    const buffer = data.toString("base64");
+    */
+    return BluetoothSerial.writeToDevice(data, id);
   },
 
   /**
@@ -473,23 +461,13 @@ BluetoothSerial.readEvery = (
  * @return {Promise<Boolean>}
  */
 BluetoothSerial.write = (data, id = null) => {
-  const originalData = data;
+  /*
   if (typeof data === "string") {
     data = new Buffer(data);
   }
-  const buffer = data.toString("hex" /*"base64"*/);
-  console.log(
-    "222 *********************************************\n",
-    {
-      aoriginalData: originalData,
-      aoriginalDataLength: originalData.length,
-      bdata: data,
-      bdataLength: data.length,
-      cbuffer: buffer
-    },
-    "\n*********************************************"
-  );
-  return BluetoothSerial.writeToDevice(buffer, id);
+  const buffer = data.toString("base64");
+  */
+  return BluetoothSerial.writeToDevice(data, id);
 };
 
 export default BluetoothSerial;
