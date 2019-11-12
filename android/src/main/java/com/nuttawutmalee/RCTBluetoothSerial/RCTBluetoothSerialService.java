@@ -523,7 +523,7 @@ class RCTBluetoothSerialService {
 
  */
                 byte[] byteBuffer = new byte[buffer.length];
-                for (index = 0; index < buffer.length; index++) {
+                for (int index = 0; index < buffer.length; index++) {
                   byteBuffer[index] = buffer[index]&0xff;
                 }
 /*
