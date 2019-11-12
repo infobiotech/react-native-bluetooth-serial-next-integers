@@ -290,7 +290,7 @@ BluetoothSerial.device = (id = null) => ({
       data = new Buffer(data);
     }
     const buffer = data.toString("hex" /*"base64"*/);
-    const finalData = Base64.atob(originalData);
+    const finalData = Base64.btoa(originalData);
     console.log(
       "111 *********************************************\n",
       {
