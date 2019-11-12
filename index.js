@@ -234,15 +234,18 @@ BluetoothSerial.device = (id = null) => ({
    * @return {Promise<Boolean>}
    */
   write: data => {
-    if (typeof data === "string") {
-      data = new Buffer(data);
-    }
-    const buffer = data.toString("hex" /*"base64"*/);
-    console.log(
-      "*********************************************",
-      buffer,
-      "*********************************************"
-    );
+      const originalData = data;
+      if (typeof data === "string") {
+        data = new Buffer(data);
+      }
+      const buffer = data.toString("hex" /*"base64"*/);
+      console.log(
+        "*********************************************\n",
+        {
+          aoriginalData: originalData, bdata: data, bdataLength: data.length, cbuffer: buffer
+        }
+        "\n*********************************************"
+      );
     return BluetoothSerial.writeToDevice(buffer, id);
   },
 
@@ -413,14 +416,17 @@ BluetoothSerial.readEvery = (
  * @return {Promise<Boolean>}
  */
 BluetoothSerial.write = (data, id = null) => {
+  const originalData = data;
   if (typeof data === "string") {
     data = new Buffer(data);
   }
   const buffer = data.toString("hex" /*"base64"*/);
   console.log(
-    "*********************************************",
-    buffer,
-    "*********************************************"
+    "*********************************************\n",
+    {
+      aoriginalData: originalData, bdata: data, bdataLength: data.length, cbuffer: buffer
+    }
+    "\n*********************************************"
   );
   return BluetoothSerial.writeToDevice(buffer, id);
 };
