@@ -1,6 +1,6 @@
 {
   "name": "@infobiotech/react-native-bluetooth-serial-next",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "Bluetooth serial for react native",
   "main": "index.js",
   "scripts": {

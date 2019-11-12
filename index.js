@@ -237,10 +237,13 @@ BluetoothSerial.device = (id = null) => ({
     if (typeof data === "string") {
       data = new Buffer(data);
     }
-    return BluetoothSerial.writeToDevice(
-      data.toString("utf8" /*"base64"*/),
-      id
+    const buffer = data.toString("hex" /*"base64"*/);
+    console.log(
+      "*********************************************",
+      buffer,
+      "*********************************************"
     );
+    return BluetoothSerial.writeToDevice(buffer, id);
   },
 
   /**
@@ -413,7 +416,13 @@ BluetoothSerial.write = (data, id = null) => {
   if (typeof data === "string") {
     data = new Buffer(data);
   }
-  return BluetoothSerial.writeToDevice(data.toString("utf8" /*"base64"*/), id);
+  const buffer = data.toString("hex" /*"base64"*/);
+  console.log(
+    "*********************************************",
+    buffer,
+    "*********************************************"
+  );
+  return BluetoothSerial.writeToDevice(buffer, id);
 };
 
 export default BluetoothSerial;
