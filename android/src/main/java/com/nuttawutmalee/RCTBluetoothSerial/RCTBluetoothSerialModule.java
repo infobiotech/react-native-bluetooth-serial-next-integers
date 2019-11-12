@@ -72,7 +72,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
 /*
  *
  */
-    private HashMap<String, /*byte[]*/ArrayList<byte[]>> mBuffers; // changed to byte[] from StringBuffer
+    private HashMap<String, /*byte[]*/ArrayList<int[]>> mBuffers; // changed to int[] from StringBuffer
     /*
      *
      */
@@ -456,7 +456,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
     }
 
     @ReactMethod
-    public void writeToDevice(/*String message*/byte[] data, @Nullable String id, Promise promise) {
+    public void writeToDevice(/*String message*/int[] data, @Nullable String id, Promise promise) {
         if (id == null) {
             id = mBluetoothService.getFirstDeviceAddress();
         }
@@ -482,14 +482,14 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
             /*
              *
              */
-        ArrayList<byte[]> data = new ArrayList<>();
+        ArrayList<int[]> data = new ArrayList<>();
             /* String data = ""; */
         /*
          *
          */
         if (mBuffers.containsKey(id)) {
 
-          ArrayList<byte[]> buffer = new ArrayList<>();
+          ArrayList<int[]> buffer = new ArrayList<>();
             buffer = mBuffers.get(id);
             /*
              * @todo split/clear the buffer
@@ -550,7 +550,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
            */
             // StringBuffer buffer = mBuffers.get(id);
             // buffer.setLength(0);
-           ArrayList<byte[]> buffer = new ArrayList<>(); // set length to 1 as if it would 'buffer.setLength(0);''
+           ArrayList<int[]> buffer = new ArrayList<>(); // set length to 1 as if it would 'buffer.setLength(0);''
         /*
          *
          */
@@ -576,7 +576,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
            */
           // byte[] emptyBuffer = new byte[1024]; // ADD
           // byte[] buffer = new byte[1024]; // ADD
-          /* ALE StringBuffer */ ArrayList<byte[]> buffer = mBuffers.get(id);
+          /* ALE StringBuffer */ ArrayList<int[]> buffer = mBuffers.get(id);
           // ALE length = buffer.length();
           length = buffer.size(); // ADD
           /*
@@ -638,7 +638,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
           /*
            *
            */
-          ArrayList<byte[]> buffer = new ArrayList<>(); // ADD
+          ArrayList<int[]> buffer = new ArrayList<>(); // ADD
             mBuffers.put(id, buffer /* ALE StringBuffer() */);
             /*
              *
@@ -721,13 +721,13 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
      * @param id   Device address
      * @param data Message
      */
-    void onData(String id, byte[] data) { // fingerprint changed
+    void onData(String id, int[] data) { // fingerprint changed
         if (mBuffers.containsKey(id)) {
           /*
            * String[] both = ArrayUtils.addAll(buffer, data);
            */
           // byte[] buffer = new byte[1024]; // ADD
-            /* ALE StringBuffer */ ArrayList<byte[]> buffer = mBuffers.get(id);
+            /* ALE StringBuffer */ ArrayList<int[]> buffer = mBuffers.get(id);
             // buffer.append(data);
             buffer.add(data);
             mBuffers.put(id, /* ALE buffer *//*data*//*mergedData*/buffer);
@@ -747,7 +747,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
 /*
  *
  */
-        /* String */byte[] completeData = readUntil(id);
+        /* String */int[] completeData = readUntil(id);
 
 
 
@@ -786,7 +786,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
      * @param id        Device address
      * @return buffer data from device
      */
-    private byte[] readUntil(String id) {
+    private int[] readUntil(String id) {
         // String data = "";
         if (mBuffers.containsKey(id)) {
         /*
@@ -796,9 +796,9 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
           /*
            *
            */
-          /* ALE StringBuffer */ ArrayList<byte[]> buffer = mBuffers.get(id);
+          /* ALE StringBuffer */ ArrayList<int[]> buffer = mBuffers.get(id);
 
-          byte[] data = buffer.remove(0);
+          int[] data = buffer.remove(0);
 
           mBuffers.put(id, buffer);
 
@@ -822,7 +822,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
  */
         }
         else {
-          byte[] emptyBuffer = new byte[1];
+          int[] emptyBuffer = new int[1];
           return emptyBuffer;
         }
 

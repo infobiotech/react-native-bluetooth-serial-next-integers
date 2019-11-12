@@ -117,7 +117,7 @@ class RCTBluetoothSerialService {
      * @param out The bytes to write
      * @see ConnectedThread#write(byte[])
      */
-    void write(String id, byte[] out) {
+    void write(String id, /*byte[]*/int[] out) {
         if (D)
             Log.d(TAG, "Write in service of device id " + id + ", state is " + STATE_CONNECTED);
         ConnectedThread r = null; // Create temporary object
@@ -459,9 +459,9 @@ class RCTBluetoothSerialService {
                  /*
 
                   */
-                 byte[] realBuffer = new byte[packLength];
+                 int[] realBuffer = new int[packLength];
                  for (int index = 0; index < packLength; index++) {
-                   realBuffer[index] = buffer[index];
+                   realBuffer[index] = buffer[index]&0xff;
                  }
                    /*
 
@@ -514,7 +514,7 @@ class RCTBluetoothSerialService {
          *
          * @param buffer The bytes to write
          */
-        void write(byte[] buffer) {
+        void write(int[] buffer) {
             try {
                 String str = new String(buffer, "UTF-8");
                 //if (D)
