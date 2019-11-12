@@ -452,7 +452,7 @@ class RCTBluetoothSerialService {
              if(bytes != packLength){
                  Log.e(TAG, "data length mismatch");
                  mModule.onError(new Exception("data length mismatch bytes = " + bytes + "  packLength = " + packLength));
-                 byte[] realBuffer1 = new byte[1];
+                 int[] realBuffer1 = int byte[1];
                  mModule.onData(id, realBuffer1);
              }
              else {
@@ -516,10 +516,20 @@ class RCTBluetoothSerialService {
          */
         void write(int[] buffer) {
             try {
-                String str = new String(buffer, "UTF-8");
-                //if (D)
+                // String str = new String(buffer, "UTF-8");
+                // if (D)
                 //    Log.d(TAG, "Write in thread " + str);
-                mmOutStream.write(buffer);
+/*
+
+ */
+                byte[] byteBuffer = new byte[buffer.length];
+                for (index = 0; index < buffer.length; index++) {
+                  byteBuffer[index] = buffer[index]&0xff;
+                }
+/*
+    
+ */
+                mmOutStream.write(byteBuffer);
             } catch (Exception e) {
                 Log.e(TAG, "Exception during write", e);
                 mModule.onError(e);
