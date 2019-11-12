@@ -240,9 +240,10 @@ BluetoothSerial.device = (id = null) => ({
     }
     const buffer = data.toString("hex" /*"base64"*/);
     console.log(
-      "*********************************************\n",
+      "111 *********************************************\n",
       {
         aoriginalData: originalData,
+        aoriginalDataLength: originalData.length,
         bdata: data,
         bdataLength: data.length,
         cbuffer: buffer
@@ -425,9 +426,10 @@ BluetoothSerial.write = (data, id = null) => {
   }
   const buffer = data.toString("hex" /*"base64"*/);
   console.log(
-    "*********************************************\n",
+    "222 *********************************************\n",
     {
       aoriginalData: originalData,
+      aoriginalDataLength: originalData.length,
       bdata: data,
       bdataLength: data.length,
       cbuffer: buffer
