@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer; // add
 import java.nio.ByteOrder; // add
+import java.util.Arrays; // to print arrays
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,8 +81,7 @@ class RCTBluetoothSerialService {
      * @param device The BluetoothDevice to connect
      */
     synchronized void connect(BluetoothDevice device) {
-        if (D)
-            Log.d(TAG, "connect to: " + device);
+        if (D) Log.d(TAG, "connect to: " + device);
 
         String id = device.getAddress();
 
@@ -107,6 +107,7 @@ class RCTBluetoothSerialService {
      * @return Is connected to device
      */
     boolean isConnected(String id) {
+        if (D) Log.d(TAG, "*** Service.isConnected *** " + id);
         return mStates.containsKey(id) && getState(id).equals(STATE_CONNECTED);
     }
 
@@ -147,8 +148,7 @@ class RCTBluetoothSerialService {
      * @param id Device address
      */
     synchronized void stop(String id) {
-        if (D)
-            Log.d(TAG, "Stop device id " + id);
+        if (D) Log.d(TAG, "Stop device id " + id);
 
         cancelConnectThread(id);
         cancelConnectedThread(id);
@@ -164,8 +164,7 @@ class RCTBluetoothSerialService {
      * Stop all threads of all devices
      */
     synchronized void stopAll() {
-        if (D)
-            Log.d(TAG, "Stop all devices");
+        if (D) Log.d(TAG, "Stop all devices");
 
         for (Map.Entry<String, ConnectThread> item : mConnectThreads.entrySet()) {
             ConnectThread thread = mConnectThreads.get(item.getKey());
@@ -212,8 +211,7 @@ class RCTBluetoothSerialService {
     private synchronized void connectionSuccess(BluetoothSocket socket, BluetoothDevice device) {
         String id = device.getAddress();
 
-        if (D)
-            Log.d(TAG, "Connected to device id " + id);
+        if (D) Log.d(TAG, "Connected to device id " + id);
 
         cancelConnectThread(id); // Cancel any thread attempting to make a connection
         cancelConnectedThread(id); // Cancel any thread currently running a connection
@@ -227,8 +225,7 @@ class RCTBluetoothSerialService {
 
         if (mStates.containsKey(id)) {
             String oldState = mStates.get(id);
-            if (D)
-                Log.d(TAG, "Device id " + id + " setState() " + oldState + " -> " + STATE_CONNECTED);
+            if (D) Log.d(TAG, "Device id " + id + " setState() " + oldState + " -> " + STATE_CONNECTED);
             mStates.put(id, STATE_CONNECTED);
         }
     }
@@ -294,8 +291,7 @@ class RCTBluetoothSerialService {
         private final BluetoothDevice mmDevice;
 
         ConnectThread(BluetoothDevice device) {
-            if (D)
-                Log.d(TAG, "Create ConnectThread");
+            if (D) Log.d(TAG, "Create ConnectThread");
 
             mmDevice = device;
             BluetoothSocket tmp = null;
@@ -311,8 +307,7 @@ class RCTBluetoothSerialService {
         }
 
         public void run() {
-            if (D)
-                Log.d(TAG, "Begin mConnectThread");
+            if (D) Log.d(TAG, "Begin mConnectThread");
             setName("ConnectThread");
 
             // Always cancel discovery because it will slow down a connection
@@ -322,11 +317,9 @@ class RCTBluetoothSerialService {
             try {
                 // This is a blocking call and will only return on a successful connection
                 // or an exception
-                if (D)
-                    Log.d(TAG, "Connecting to socket...");
+                if (D) Log.d(TAG, "Connecting to socket...");
                 mmSocket.connect();
-                if (D)
-                    Log.d(TAG, "Connected");
+                if (D) Log.d(TAG, "Connected");
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
                 mModule.onError(e);
@@ -405,8 +398,7 @@ class RCTBluetoothSerialService {
         private final OutputStream mmOutStream;
 
         ConnectedThread(BluetoothSocket socket, BluetoothDevice device) {
-            if (D)
-                Log.d(TAG, "Create ConnectedThread");
+            if (D) Log.d(TAG, "Create ConnectedThread");
             mmSocket = socket;
             mmDevice = device;
             InputStream tmpIn = null;
@@ -429,31 +421,35 @@ class RCTBluetoothSerialService {
             Log.i(TAG, "Begin mConnectedThread");
             byte[] buffer = new byte[1024];
             int bytes;
-
-
             String id = mmDevice.getAddress();
-
             // Keep listening to the InputStream while connected
             while (true) {
+                buffer = new byte[1024]; // free and reset
                 try {
                     bytes = mmInStream.read(buffer); // Read from the InputStream
                     /*
                      *
                      */
+Log.i(TAG, "*** Mac " + id + " *** Bytes " + bytes + " *** " + Arrays.toString(buffer));
+                    // int[] intArray = { 7, 9, 5, 1, 3 };
+// System.out.println();
                      //Infobiotech Bluetooth protocol by GIOVANNI
              int packLength = -1;
              try{
                  byte[] packLengthBytes = {buffer[0], buffer[1]};
                  packLength = (int) ByteBuffer.wrap(packLengthBytes).order(ByteOrder.BIG_ENDIAN).getShort();
              }catch(Exception e){
-                   Log.e(TAG, "data length mismatch");
-                   mModule.onError(new Exception("Error parsing packet length in header: " + e.getMessage()));
+                   Log.e(TAG, "Error parsing packet length in header: " + e.getMessage(), e);
+                   mModule.onError(new Exception("Device "+id+". Error parsing packet length in header: " + e.getMessage()));
              }
+             /**
+              * 
+              */
              if(bytes != packLength){
-                 Log.e(TAG, "data length mismatch");
-                 mModule.onError(new Exception("data length mismatch bytes = " + bytes + "  packLength = " + packLength));
-                 byte[] realBuffer1 = new byte[1];
-                 mModule.onData(id, realBuffer1);
+                 Log.e(TAG, "data length mismatch bytes = " + bytes + "  packLength = " + packLength);
+                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + "  packLength = " + packLength));
+                 // byte[] realBuffer1 = new byte[1];
+                 // mModule.onData(id, realBuffer1);
              }
              else {
                  /*
@@ -517,8 +513,7 @@ class RCTBluetoothSerialService {
         void write(byte[] buffer) {
             try {
                 String str = new String(buffer, "UTF-8");
-                if (D)
-                    Log.d(TAG, "Write in thread " + str);
+                if (D) Log.d(TAG, "Write in thread " + str);
                 mmOutStream.write(buffer);
             } catch (Exception e) {
                 Log.e(TAG, "Exception during write", e);
