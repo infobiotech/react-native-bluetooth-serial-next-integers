@@ -430,7 +430,7 @@ class RCTBluetoothSerialService {
                     /*
                      *
                      */
-Log.i(TAG, "*** Mac " + id + " *** Bytes " + bytes + " *** " + Arrays.toString(buffer));
+// Log.i(TAG, "*** Mac " + id + " *** Bytes " + bytes + " *** " + Arrays.toString(buffer));
                     // int[] intArray = { 7, 9, 5, 1, 3 };
 // System.out.println();
                      //Infobiotech Bluetooth protocol by GIOVANNI
@@ -445,28 +445,62 @@ Log.i(TAG, "*** Mac " + id + " *** Bytes " + bytes + " *** " + Arrays.toString(b
              /**
               * 
               */
-             if(bytes != packLength){
-                 Log.e(TAG, "data length mismatch bytes = " + bytes + "  packLength = " + packLength);
-                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + "  packLength = " + packLength));
+             if(bytes < packLength){
+                 Log.e(TAG, "data length mismatch bytes = " + bytes + " less than packLength = " + packLength);
+                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + " less than packLength = " + packLength));
                  // byte[] realBuffer1 = new byte[1];
                  // mModule.onData(id, realBuffer1);
              }
-             else {
+             /*
+             else if(bytes > packLength){
+                 Log.e(TAG, "data length mismatch bytes = " + bytes + "  packLength = " + packLength);
+                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + " >  packLength = " + packLength));
+                 // byte[] realBuffer1 = new byte[1];
+                 // mModule.onData(id, realBuffer1);
+             }
+             */
+             else { // >= case
                  /*
 
                   */
-                 byte[] realBuffer = new byte[packLength];
-                 for (int index = 0; index < packLength; index++) {
-                   realBuffer[index] = buffer[index];
-                 }
-                   /*
+                  int shift = 0;
+                    do {
 
-                    */
-                    //ArrayList<byte[]> messageArrayListItem = new ArrayList<>();
-                    //messageArrayListItem.add(realBuffer);
-                 // String data = new String(buffer, 0, bytes, "ISO-8859-1");
-                 mModule.onData(id, realBuffer/* ALE data */); // Send the new data String to the UI Activity
+                        byte[] realBuffer = new byte[packLength];
+                        for (int index = 0; index < packLength; index++) {
+                        realBuffer[index] = buffer[index+shift];
+                        }
+                        /*
+
+                            */
+                            //ArrayList<byte[]> messageArrayListItem = new ArrayList<>();
+                            //messageArrayListItem.add(realBuffer);
+                        // String data = new String(buffer, 0, bytes, "ISO-8859-1");
+                        mModule.onData(id, realBuffer/* ALE data */); // Send the new data String to the UI Activity
+
+            shift += packLength;
+            packLength = 0;
+
+             try{
+
+                 byte[] packLengthBytes = {buffer[shift], buffer[shift+1]};
+                 packLength = (int) ByteBuffer.wrap(packLengthBytes).order(ByteOrder.BIG_ENDIAN).getShort();
+
+             }catch(Exception e){
+
+                   Log.e(TAG, "Error parsing leftover packet length in header: " + e.getMessage(), e);
+                   mModule.onError(new Exception("Device "+id+". Error parsing leftover packet length in header: " + e.getMessage()));
+                   
+             }
+
+
+
+                    }while(packLength > 0);
                  /*
+
+                  */
+
+                  /* 
 
                   */
              }
