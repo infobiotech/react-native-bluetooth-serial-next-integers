@@ -85,19 +85,39 @@ class RCTBluetoothSerialService {
 
         String id = device.getAddress();
 
-        cancelConnectThread(id); // Cancel any thread attempting to make a connection
-        cancelConnectedThread(id); // Cancel any thread currently running a connection
+        try {
+            cancelConnectThread(id); // Cancel any thread attempting to make a connection
+        } catch (Exception e1) {
+            Log.e(TAG, "Error on cancelConnectThread " + id, e1);
+            mModule.onError(e1, id);
+        }
 
+        try {
+        cancelConnectedThread(id); // Cancel any thread currently running a connection
+        } catch (Exception e2) {
+            Log.e(TAG, "Error on cancelConnectedThread " + id, e2);
+            mModule.onError(e2, id);
+        }
+
+        try {
         // Start the thread to connect with the given device
         ConnectThread thread = new ConnectThread(device);
         thread.start();
-
         if (mConnectedThreads.isEmpty()) {
             mFirstDeviceAddress = id;
         }
-
         mConnectThreads.put(id, thread);
+        } catch (Exception e3) {
+            Log.e(TAG, "Error on Start thread to connect with the given device " + id, e3);
+            mModule.onError(e3, id);
+        }
+
+try {
         mStates.put(id, STATE_CONNECTING);
+ } catch (Exception e7) {
+            Log.e(TAG, "Error on mStates.put(id, STATE_CONNECTING) " + id, e7);
+            mModule.onError(e7, id);
+        }
     }
 
     /**
@@ -108,7 +128,9 @@ class RCTBluetoothSerialService {
      */
     boolean isConnected(String id) {
         if (D) Log.d(TAG, "*** Service.isConnected *** " + id);
+
         return mStates.containsKey(id) && getState(id).equals(STATE_CONNECTED);
+
     }
 
     /**
@@ -138,7 +160,7 @@ class RCTBluetoothSerialService {
             r.write(out); // Perform the write unsynchronized
         } else {
             Log.e(TAG, "Unable to write, connected thread is null");
-            mModule.onError(new Exception(("Unable to write, connected thread is null")));
+            mModule.onError(new Exception(("Unable to write, connected thread is null")), id);
         }
     }
 
@@ -236,8 +258,13 @@ class RCTBluetoothSerialService {
      * @param device The BluetoothDevice that has been failed to connect
      */
     private void connectionFailed(BluetoothDevice device) {
-        mModule.onConnectionFailed("Unable to connect to device", device); // Send a failure message with device
-        RCTBluetoothSerialService.this.stop(device.getAddress()); // Start the service over to restart listening mode
+        try {
+            mModule.onConnectionFailed("Unable to connect to device", device); // Send a failure message with device
+            RCTBluetoothSerialService.this.stop(device.getAddress()); // Start the service over to restart listening mode
+        } catch (Exception e) {
+            mModule.onError(e, device.getAddress());
+            Log.e(TAG, "*** connectionFailed - Unable to connect to device", e);
+        }
     }
 
     /**
@@ -246,8 +273,13 @@ class RCTBluetoothSerialService {
      * @param device The BluetoothDevice that has been lost
      */
     private void connectionLost(BluetoothDevice device) {
-        mModule.onConnectionLost("Device connection was lost", device); // Send a failure message
-        RCTBluetoothSerialService.this.stop(device.getAddress()); // Start the service over to restart listening mode
+        try {
+            mModule.onConnectionLost("Device connection was lost", device); // Send a failure message
+            RCTBluetoothSerialService.this.stop(device.getAddress()); // Start the service over to restart listening mode
+        } catch (Exception e) {
+            mModule.onError(e, device.getAddress());
+            Log.e(TAG, "*** connectionLost - Device connection was lost", e);
+        }
     }
 
     /**
@@ -300,7 +332,7 @@ class RCTBluetoothSerialService {
             try {
                 tmp = device.createRfcommSocketToServiceRecord(UUID_SPP);
             } catch (Exception e) {
-                mModule.onError(e);
+                mModule.onError(e, device.getAddress());
                 Log.e(TAG, "Socket create() failed", e);
             }
             mmSocket = tmp;
@@ -347,10 +379,15 @@ class RCTBluetoothSerialService {
                         try {
                             mmSocket.close();
                         } catch (Exception e4) {
-                            Log.e(TAG, "unable to close() socket during connection failure", e3);
+                            Log.e(TAG, "unable to close() socket during connection failure", e4);
                             mModule.onError(e4);
                         }
-                        connectionFailed(mmDevice);
+                        try {
+                            connectionFailed(mmDevice);
+                        } catch (Exception e5) {
+                            Log.e(TAG, "connectionFailed failed", e5);
+                            mModule.onError(e5);
+                        }
                         return;
                     }
                 }
@@ -440,21 +477,21 @@ class RCTBluetoothSerialService {
                  packLength = (int) ByteBuffer.wrap(packLengthBytes).order(ByteOrder.BIG_ENDIAN).getShort();
              }catch(Exception e){
                    Log.e(TAG, "Error parsing packet length in header: " + e.getMessage(), e);
-                   mModule.onError(new Exception("Device "+id+". Error parsing packet length in header: " + e.getMessage()));
+                   mModule.onError(new Exception("Device "+id+". Error parsing packet length in header: " + e.getMessage()), id);
              }
              /**
               * 
               */
              if(bytes < packLength){
                  Log.e(TAG, "data length mismatch bytes = " + bytes + " less than packLength = " + packLength);
-                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + " less than packLength = " + packLength));
+                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + " less than packLength = " + packLength), id);
                  // byte[] realBuffer1 = new byte[1];
                  // mModule.onData(id, realBuffer1);
              }
              /*
              else if(bytes > packLength){
                  Log.e(TAG, "data length mismatch bytes = " + bytes + "  packLength = " + packLength);
-                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + " >  packLength = " + packLength));
+                 mModule.onError(new Exception("Device "+id+". Data length mismatch bytes = " + bytes + " >  packLength = " + packLength), id);
                  // byte[] realBuffer1 = new byte[1];
                  // mModule.onData(id, realBuffer1);
              }
@@ -489,7 +526,7 @@ class RCTBluetoothSerialService {
              }catch(Exception e){
 
                    Log.e(TAG, "Error parsing leftover packet length in header: " + e.getMessage(), e);
-                   mModule.onError(new Exception("Device "+id+". Error parsing leftover packet length in header: " + e.getMessage()));
+                   mModule.onError(new Exception("Device "+id+". Error parsing leftover packet length in header: " + e.getMessage()), id);
                    
              }
 
@@ -532,7 +569,7 @@ class RCTBluetoothSerialService {
  */
                 } catch (Exception e) {
                     Log.e(TAG, "disconnected", e);
-                    mModule.onError(e);
+                    mModule.onError(e, id);
                     connectionLost(mmDevice);
                     break;
                 }

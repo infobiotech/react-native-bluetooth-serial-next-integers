@@ -653,14 +653,24 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
         String id = connectedDevice.getAddress();
 
         if (mConnectedPromises.containsKey(id)) {
-            Promise promise = mConnectedPromises.get(id);
-
-            if (promise != null) {
-                promise.reject(new Exception(msg));
+            try {
+                Promise promise = mConnectedPromises.get(id);
+                if (promise != null) {
+                    promise.reject(new Exception(msg));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error on promise " + id, e);
+                onError(e, id);
             }
         }
 
-        sendEvent(CONN_FAILED, params);
+        try {
+            sendEvent(CONN_FAILED, params);
+        } catch (Exception e) {
+            Log.e(TAG, "Error on sendEvent(CONN_FAILED, params) " + id, e);
+            onError(e, id);
+        }
+
     }
 
     /**
@@ -874,7 +884,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 mPairDevicePromise.reject(e);
                 mPairDevicePromise = null;
             }
-            onError(e);
+            onError(e, device.getAddress());
         }
     }
 
@@ -895,7 +905,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 mPairDevicePromise.reject(e);
                 mPairDevicePromise = null;
             }
-            onError(e);
+            onError(e, device.getAddress());
         }
     }
 
