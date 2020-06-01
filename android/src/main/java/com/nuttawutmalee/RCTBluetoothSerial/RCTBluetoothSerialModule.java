@@ -52,6 +52,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
     private static final String DEVICE_READ = "read";
     private static final String DATA_READ = "data";
     private static final String ERROR = "error";
+    private static final String DEVICE_FOUND = "newDevice";
 
     // Other stuff
     private static final int REQUEST_ENABLE_BLUETOOTH = 1;
@@ -839,8 +840,19 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
      */
     private void sendEvent(String eventName, @Nullable WritableMap params) {
         if (mReactContext.hasActiveCatalystInstance()) {
-            if (D) Log.d(TAG, "Sending event: " + eventName);
-            mReactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+            if (D) Log.d(TAG, "*** Sending event: " + eventName);
+            /**
+             *
+             */
+            try {
+                mReactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot sendEvent " + eventName, e);
+                onError(e);
+            }
+            /**
+             *
+             */
         }
     }
 
@@ -1002,6 +1014,26 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                     if (D) Log.d(TAG, "Discovery extra device (device id: " + rawDevice.getAddress() + ")");
 
                     WritableMap device = deviceToWritableMap(rawDevice);
+
+                    /**
+                     *
+                     */
+                    WritableMap params = Arguments.createMap();
+                    params.putString("address", rawDevice.getAddress());
+                    params.putString("name", rawDevice.getName());
+                    /**
+                     *
+                     */
+                    try {
+                        sendEvent(DEVICE_FOUND, params);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Cannot sendEvent DEVICE_FOUND for " + rawDevice.getAddress() , e);
+                        onError(e, rawDevice.getAddress());
+                    }
+                    /**
+                     *
+                     */
+
                     unpairedDevices.pushMap(device);
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     if (D) Log.d(TAG, "Discovery finished");
