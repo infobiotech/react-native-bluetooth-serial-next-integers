@@ -234,7 +234,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                     Exception e = new Exception("Cannot start activity");
                     Log.e(TAG, "Cannot start activity", e);
                     promise.reject(e);
-                    onError(e);
+                    onError(e, "", "RCTBluetoothSerialModule.requestEnable");
                 }
             }
         } else {
@@ -256,7 +256,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 } catch (Exception e) {
                     Log.e(TAG, "Cannot enable bluetooth");
                     promise.reject(e);
-                    onError(e);
+                    onError(e, "", "RCTBluetoothSerialModule.enable");
                 }
             }
         } else {
@@ -278,7 +278,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 } catch (Exception e) {
                     Log.e(TAG, "Cannot disable bluetooth");
                     promise.reject(e);
-                    onError(e);
+                    onError(e, "", "RCTBluetoothSerialModule.disable");
                 }
             }
         } else {
@@ -662,7 +662,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error on promise " + id, e);
-                onError(e, id);
+                onError(e, id, "RCTBluetoothSerialModule.onConnectionFailed.catch.01");
             }
         }
 
@@ -670,7 +670,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
             sendEvent(CONN_FAILED, params);
         } catch (Exception e) {
             Log.e(TAG, "Error on sendEvent(CONN_FAILED, params) " + id, e);
-            onError(e, id);
+            onError(e, id, "RCTBluetoothSerialModule.onConnectionFailed.catch.02");
         }
 
     }
@@ -697,16 +697,35 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
      *
      * @param e Exception
      */
-    void onError(Exception e, String id) {
+    void onError(Exception e, String id, String tag) {
         WritableMap params = Arguments.createMap();
         params.putString("message", e.getMessage());
+        /**
+         * 
+         */
+        StackTraceElement[] errorStackTraceArray = e.getStackTrace();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < errorStackTraceArray.length; i++) {
+            sb.append(errorStackTraceArray[i]);
+            sb.append(" --- ");
+        }
+        String joined = sb.toString();
+        String stackTrace = joined.substring(0, joined.length()-5);
+        params.putString("stackTrace", stackTrace);
+        /**
+         * 
+         */
+        params.putString("tag", tag);
+        /**
+         * 
+         */
         params.putString("deviceId", id);
         sendEvent(ERROR, params);
     }
 
     // overloading
     void onError(Exception e) {
-        onError(e, "");
+        onError(e, "", "");
     }
 
     /**
@@ -849,7 +868,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 mReactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
             } catch (Exception e) {
                 Log.e(TAG, "Cannot sendEvent " + eventName, e);
-                onError(e);
+                onError(e, "", "RCTBluetoothSerialModule.sendEvent.catch.01");
             }
             /**
              *
@@ -897,7 +916,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 mPairDevicePromise.reject(e);
                 mPairDevicePromise = null;
             }
-            onError(e, device.getAddress());
+            onError(e, device.getAddress(), "RCTBluetoothSerialModule.pairDevice.catch.01");
         }
     }
 
@@ -918,7 +937,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                 mPairDevicePromise.reject(e);
                 mPairDevicePromise = null;
             }
-            onError(e, device.getAddress());
+            onError(e, device.getAddress(), "RCTBluetoothSerialModule.unpairDevice.catch.01");
         }
     }
 
@@ -931,7 +950,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
         Exception e = new Exception("Bluetooth adapter not found");
         Log.e(TAG, "Bluetooth adapter not found");
         promise.reject(e);
-        onError(e);
+        onError(e, "", "RCTBluetoothSerialModule.rejectNullBluetoothAdapter");
     }
 
     /**
@@ -971,7 +990,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                         } catch (Exception e) {
                             Log.e(TAG, "Cannot unregister receiver", e);
                             // onError(e, deviceId);
-                            onError(e);
+                            onError(e, "", "RCTBluetoothSerialModule.registerDevicePairingReceiver.BroadcastReceiver.catch.01");
                         }
                     } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
                         if (RCTBluetoothSerialService.debugMode) Log.d(TAG, "Device unpaired");
@@ -984,7 +1003,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                         } catch (Exception e) {
                             Log.e(TAG, "Cannot unregister receiver", e);
                             // onError(e, deviceId);
-                            onError(e);
+                            onError(e, "", "RCTBluetoothSerialModule.registerDevicePairingReceiver.BroadcastReceiver.catch.02");
                         }
                     }
                 }
@@ -1035,7 +1054,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                         sendEvent(DEVICE_FOUND, params);
                     } catch (Exception e) {
                         Log.e(TAG, "Cannot sendEvent DEVICE_FOUND for " + rawDevice.getAddress() , e);
-                        onError(e, rawDevice.getAddress());
+                        onError(e, rawDevice.getAddress(), "RCTBluetoothSerialModule.registerBluetoothDeviceDiscoveryReceiver.BroadcastReceiver.catch.01");
                     }
                     /**
                      *
@@ -1054,7 +1073,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                         mReactContext.unregisterReceiver(this);
                     } catch (Exception e) {
                         Log.e(TAG, "Unable to unregister receiver", e);
-                        onError(e);
+                        onError(e, "", "RCTBluetoothSerialModule.registerBluetoothDeviceDiscoveryReceiver.BroadcastReceiver.catch.02");
                     }
                 }
             }
@@ -1105,7 +1124,7 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
                         mReactContext.unregisterReceiver(this);
                     } catch (Exception e) {
                         Log.e(TAG, "Unable to unregister receiver", e);
-                        onError(e);
+                        onError(e, "", "RCTBluetoothSerialModule.registerFirstAvailableBluetoothDeviceDiscoveryReceiver.BroadcastReceiver.catch.01");
                     }
                 }
             }
