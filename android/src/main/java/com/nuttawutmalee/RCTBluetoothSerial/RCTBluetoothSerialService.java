@@ -131,7 +131,7 @@ try {
      * @return Is connected to device
      */
     boolean isConnected(String id) {
-        if (D) Log.d(TAG, "*** Service.isConnected *** " + id);
+        if (debugMode) Log.d(TAG, "*** Service.isConnected *** " + id);
 
         return mStates.containsKey(id) && getState(id).equals(STATE_CONNECTED);
 
@@ -145,7 +145,7 @@ try {
      * @see ConnectedThread#write(byte[])
      */
     void write(String id, byte[] out) {
-        if (D)
+        if (debugMode)
             Log.d(TAG, "Write in service of device id " + id + ", state is " + STATE_CONNECTED);
         ConnectedThread r = null; // Create temporary object
 
@@ -174,7 +174,7 @@ try {
      * @param id Device address
      */
     synchronized void stop(String id) {
-        if (D) Log.d(TAG, "Stop device id " + id);
+        if (debugMode) Log.d(TAG, "Stop device id " + id);
 
         cancelConnectThread(id);
         cancelConnectedThread(id);
@@ -190,7 +190,7 @@ try {
      * Stop all threads of all devices
      */
     synchronized void stopAll() {
-        if (D) Log.d(TAG, "Stop all devices");
+        if (debugMode) Log.d(TAG, "Stop all devices");
 
         for (Map.Entry<String, ConnectThread> item : mConnectThreads.entrySet()) {
             ConnectThread thread = mConnectThreads.get(item.getKey());
@@ -237,7 +237,7 @@ try {
     private synchronized void connectionSuccess(BluetoothSocket socket, BluetoothDevice device) {
         String id = device.getAddress();
 
-        if (D) Log.d(TAG, "Connected to device id " + id);
+        if (debugMode) Log.d(TAG, "Connected to device id " + id);
 
         cancelConnectThread(id); // Cancel any thread attempting to make a connection
         cancelConnectedThread(id); // Cancel any thread currently running a connection
@@ -251,7 +251,7 @@ try {
 
         if (mStates.containsKey(id)) {
             String oldState = mStates.get(id);
-            if (D) Log.d(TAG, "Device id " + id + " setState() " + oldState + " -> " + STATE_CONNECTED);
+            if (debugMode) Log.d(TAG, "Device id " + id + " setState() " + oldState + " -> " + STATE_CONNECTED);
             mStates.put(id, STATE_CONNECTED);
         }
     }
@@ -360,7 +360,7 @@ try {
          */
 
         ConnectThread(BluetoothDevice device) {
-            if (D) Log.d(TAG, "Create ConnectThread");
+            if (debugMode) Log.d(TAG, "Create ConnectThread");
 
             mmDevice = device;
             /**
@@ -383,7 +383,7 @@ try {
         }
 
         public void run() {
-            if (D) Log.d(TAG, "Begin mConnectThread");
+            if (debugMode) Log.d(TAG, "Begin mConnectThread");
             setName("ConnectThread");
 
             // Always cancel discovery because it will slow down a connection
@@ -393,9 +393,9 @@ try {
             try {
                 // This is a blocking call and will only return on a successful connection
                 // or an exception
-                if (D) Log.d(TAG, "Connecting to socket...");
+                if (debugMode) Log.d(TAG, "Connecting to socket...");
                 mmSocket.connect();
-                if (D) Log.d(TAG, "Connected");
+                if (debugMode) Log.d(TAG, "Connected");
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
                 mModule.onError(e, deviceId, "ConnectThread.run.catch.01");
@@ -486,7 +486,7 @@ try {
          */
 
         ConnectedThread(BluetoothSocket socket, BluetoothDevice device) {
-            if (D) Log.d(TAG, "Create ConnectedThread");
+            if (debugMode) Log.d(TAG, "Create ConnectedThread");
             mmSocket = socket;
             mmDevice = device;
             /**
@@ -642,7 +642,7 @@ try {
         void write(byte[] buffer) {
             try {
                 String str = new String(buffer, "UTF-8");
-                if (D) Log.d(TAG, "Write in thread " + str);
+                if (debugMode) Log.d(TAG, "Write in thread " + str);
                 mmOutStream.write(buffer);
             } catch (Exception e) {
                 Log.e(TAG, "Exception during write", e);
