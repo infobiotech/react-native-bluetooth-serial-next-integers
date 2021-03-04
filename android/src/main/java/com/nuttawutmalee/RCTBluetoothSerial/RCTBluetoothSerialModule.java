@@ -445,8 +445,13 @@ public class RCTBluetoothSerialModule extends ReactContextBaseJavaModule
         if (RCTBluetoothSerialService.debugMode) Log.d(TAG, "Write to device id " + id + " : " + message);
 
         if (id != null) {
-            byte[] data = Base64.decode(message, Base64.DEFAULT);
-            mBluetoothService.write(id, data);
+            try {
+                byte[] data = Base64.decode(message, Base64.DEFAULT);
+                mBluetoothService.write(id, data);
+            } catch (Exception e) {
+                Log.e(TAG, "Error on writeToDevice " + id, e);
+                onError(e, id, "RCTBluetoothSerialModule.writeToDevice.catch");
+            }
         }
 
         promise.resolve(true);
